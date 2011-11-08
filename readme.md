@@ -1,4 +1,4 @@
-# Cryptlet :: A little bit 'o' privacy for Gmail in a bookmarklet.
+# Cryptlet :: A little 'o' privacy for Gmail in a bookmarklet.
 
 ### What it does
 
