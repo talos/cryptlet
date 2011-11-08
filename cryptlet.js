@@ -99,7 +99,6 @@ sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.S,d;b=b||{};d=b.iter||1E3;c
 	decrypt = function ( ) {
 		var password = prompt('Enter a password, please!'),
 		textElement = this.parentNode.firstChild;
- 		console.log("decrypting: " + textElement.textContent);
 		textElement.textContent = sjcl.decrypt(password, textElement.textContent);
 	},
 
