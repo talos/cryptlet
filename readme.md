@@ -2,13 +2,13 @@
 
 ### What it does
 
-Provides very basic, insecure encryption and decryption in [Gmail](http://www.gmail.com/), through a bookmarklet.  Uses the (Stanford Javascript Crypto Library)[http://bitwiseshiftleft.github.com/sjcl/].
+Provides very basic, insecure encryption and decryption in [Gmail](http://www.gmail.com/), through a bookmarklet.  Uses the [Stanford Javascript Crypto Library](http://bitwiseshiftleft.github.com/sjcl/).
 
 ### Usage
 
-*Safari* : Paste the [bookmarklet](cryptlet/blob/master/cryptlet.bookmarklet) into the URL bar after navigating to [Gmail](http://www.gmail.com/).  Alternatively, add it as a bookmark and hit it after navigating to [Gmail](http://www.gmail.com/).
-*Chrome* : Add the [bookmarklet](cryptlet/blob/master/cryptlet.bookmarklet) as a bookmark and hit it after navigating to [Gmail](http://www.gmail.com/).  Chrome doesn't support pasting a bookmarklet this long.
-*Firefox*: Not supported. Yet.
+* __Safari__ : Paste the [bookmarklet](cryptlet/blob/master/cryptlet.bookmarklet) into the URL bar after navigating to [Gmail](http://www.gmail.com/).  Alternatively, add it as a bookmark and hit it after navigating to [Gmail](http://www.gmail.com/).
+* __Chrome__ : Add the [bookmarklet](cryptlet/blob/master/cryptlet.bookmarklet) as a bookmark and hit it after navigating to [Gmail](http://www.gmail.com/).  Chrome doesn't support pasting a bookmarklet this long.
+* __Firefox__: Not supported. Yet.
 
 ### Is this a good way to secure my email?
 
