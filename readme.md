@@ -10,7 +10,7 @@ Provides very basic, insecure encryption and decryption in [Gmail](http://www.gm
 * __Chrome__ : Add the [bookmarklet](cryptlet/blob/master/cryptlet.bookmarklet) as a bookmark and hit it after navigating to [Gmail](http://www.gmail.com/).  Chrome doesn't support pasting a bookmarklet this long.
 * __Firefox__: Not supported. Yet.
 
-__To encrypt__: Navigate to compose, and click the "Encrypt" button before sending your mail.  Enter in a good password.  Don't forget it, because the body will disappear.  Yes, Gmail's auto-save renders is one of many security flaws.
+__To encrypt__: Compose a message, and click the "Encrypt" button before sending your mail.  Enter in a good password.  Don't forget it, because the body will disappear.  Yes, Gmail's auto-save renders this insecure.  Cryptlet doesn't recognize the composition area for replies right now, so you'll have to compose a fresh email.
 
 __To decrypt__: You'll notice that emails now have a "Decrypt" link at the end of their text.  If you received an encrypted email, click "Decrypt" and enter the password it was encrypted with.  If you enter the right password, you will see the original message.  The decrypted message will not persist if you navigate away from the page.
 
