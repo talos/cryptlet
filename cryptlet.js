@@ -5,9 +5,9 @@
   *
   * http://crypto.stanford.edu/sjcl/
   *
-  * Default encryption generates a 128-bit symmetric AES key, and
-  * encrypts using CCM with randomized salts and initialization
-  * vectors.
+  * Default encryption generates a 128-bit symmetric AES key with
+  * randomized salts and initialization vectors, and encrypts using
+  * CCM mode.
   *
   * Copyright John Krauss 2011
   * Licensed under the BSD license.  See BSD.license for details.
