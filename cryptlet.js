@@ -263,9 +263,9 @@ sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.R,d;b=b||{};d=b.iter||1E3;c
     },
 
     /**
-      * Handle hash changes, keeping the interface fresh.
+      * Keep the interface fresh.
       */
-    hashChangeHandler = function() {
+    refresh = function() {
         // var curFragment = document.location.hash,
 
         buildComposeInterface();
@@ -273,10 +273,12 @@ sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.R,d;b=b||{};d=b.iter||1E3;c
     };
 
     // Keep us fresh.  It all dies on reload, though.
-    window.onhashchange = hashChangeHandler;
+    window.onhashchange = refresh;
 
     // Google rebuilds the change after certain clicks.  Catch these
     // events on the capture (way down) because they won't bubble back
     // up.
-    gmailDoc.addEventListener('click', hashChangeHandler, true);
+    gmailDoc.addEventListener('click', refresh, true);
+
+    refresh(); // refresh when bookmarklet first loaded.
 })();
