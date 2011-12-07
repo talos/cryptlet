@@ -26,4 +26,4 @@ After editing `cryptlet.js`, you can regenerate `cryptlet.bookmarklet` by runnin
 
 ### Versions
 
-.01 : First version
+0.0.1 : First version
