@@ -136,7 +136,7 @@ sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.R,d;b=b||{};d=b.iter||1E3;c
         try {
             // Chop off the start and end blocks.
             var rawText = trimmed.slice(startBlock.length, -endBlock.length);
-            textElement.textContent = sjcl.decrypt(password, rawText);
+            textElement.innerText = sjcl.decrypt(password, rawText);
             // Remove the element, since we have decrypted.
             this.parentNode.removeChild( this );
         } catch(err) {
