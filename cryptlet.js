@@ -1,8 +1,16 @@
 /**
   * Cryptlet :: A little bit 'o' privacy for Gmail in a bookmarklet.
   *
+  * Uses the Stanford Javascript Crypto Library
+  *
+  * http://crypto.stanford.edu/sjcl/
+  *
+  * Default encryption generates a 128-bit symmetric AES key, and
+  * encrypts using CCM with randomized salts and initialization
+  * vectors.
+  *
   * Copyright John Krauss 2011
-  * 
+  * Licensed under the BSD license.  See BSD.license for details.
   */
 
 (function () {
