@@ -6,7 +6,7 @@
 
 (function () {
 
-	/*************** http://crypto.stanford.edu/sjcl/sjcl.js *******************/
+    /*************** http://crypto.stanford.edu/sjcl/sjcl.js *******************/
 "use strict";var sjcl={cipher:{},hash:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.h[0][0][0]||this.w();var b,c,d,e,f=this.h[0][4],g=this.h[1];b=a.length;var h=1;if(b!==4&&b!==6&&b!==8)throw new sjcl.exception.invalid("invalid aes key size");this.a=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(a%b===0||b===8&&a%b===4){c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255];if(a%b===0){c=c<<8^c>>>24^h<<24;h=h<<1^(h>>7)*283}}d[a]=d[a-b]^c}for(b=0;a;b++,a--){c=d[b&3?a:a-4];e[b]=a<=4||b<4?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^
 g[3][f[c&255]]}};
@@ -47,190 +47,218 @@ b.ct,b.iv,b.adata,b.tag);e.c(d,b);d.key=a;return sjcl.codec.utf8String.fromBits(
 undefined)a={};if(b===undefined)return a;var d;for(d in b)if(b.hasOwnProperty(d)){if(c&&a[d]!==undefined&&a[d]!==b[d])throw new sjcl.exception.invalid("required parameter overridden");a[d]=b[d]}return a},V:function(a,b){var c={},d;for(d in a)if(a.hasOwnProperty(d)&&a[d]!==b[d])c[d]=a[d];return c},W:function(a,b){var c={},d;for(d=0;d<b.length;d++)if(a[b[d]]!==undefined)c[b[d]]=a[b[d]];return c}};sjcl.encrypt=sjcl.json.encrypt;sjcl.decrypt=sjcl.json.decrypt;sjcl.misc.S={};
 sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.S,d;b=b||{};d=b.iter||1E3;c=c[a]=c[a]||{};d=c[d]=c[d]||{firstSalt:b.salt&&b.salt.length?b.salt.slice(0):sjcl.random.randomWords(2,0)};c=b.salt===undefined?d.firstSalt:b.salt;d[c]=d[c]||sjcl.misc.pbkdf2(a,c,b.iter);return{key:d[c].slice(0),salt:c.slice(0)}};
 
-	/* Cryptlet
-	 *
-	 *
-	 */
+    /* Cryptlet
+     *
+     *
+     */
 
-	//
-	// Constant Definitions
-	//
-	var containerClass = 'cryptlet-container',
+    //
+    // Constant Definitions
+    //
+    var containerClass = 'cryptlet-container',
+    minPasswordLength = 8,
+    startBlock = '===start=cryptlet===',
+    endBlock = '===end=cryptlet===',
 
-	//
-	// Find elements on the page
-	//
+    //
+    // Find elements on the page
+    //
 
-	// Obtain reference to content of big Gmail frame, which is our document.
-	iframe = document.getElementById('canvas_frame'),
-	gmailDoc = iframe.contentDocument || iframe.contentWindow.document,
+    // Obtain reference to content of big Gmail frame, which is our document.
+    iframe = document.getElementById('canvas_frame'),
+    gmailDoc = iframe.contentDocument || iframe.contentWindow.document,
 
-	//
-	// Function definitions
-	//
+    //
+    // Function definitions
+    //
 
-	/**
-	  * Alert the user about a failure, throw us out of the bookmarklet.
-	  */
-	fail = function ( msg ) {
-		alert( msg );
-		throw( msg );
-	},
+    /**
+      * Alert the user about a failure, throw us out of the bookmarklet.
+      */
+    fail = function ( msg ) {
+        alert( msg );
+        throw( msg );
+    },
 
-	/**
+    /**
+      * Return true if the text is already encrypted by cryptlet, false otherwise.
+      */
+    isEncrypted = function( text ) {
+        return text.slice( 0, startBlock.length ) === startBlock &&
+            text.slice( -endBlock.length ) === endBlock;
+    },
+
+    /**
       * Encrypt the body of your gmail message.
       */
-	encrypt = function () {
+    encrypt = function () {
 
-		var password = prompt('Enter a password, please!'),
-		bodyTextarea = gmailDoc.getElementsByName('body')[0];// Find the body textarea
+        var bodyTextarea = gmailDoc.getElementsByName('body')[0];// Find the body textarea
+        if ( isEncrypted( bodyTextarea.value )) {
+            fail( 'You have already encrypted this text.' );
+        }
 
-		if( password === '' ) {
-			fail( 'You must enter a password.' );
-		} else if( password.length < 12 ) {
-			fail( 'You must enter a longer password.' );
-		}
-		bodyTextarea.value = sjcl.encrypt(password, bodyTextarea.value);
-	},
+        var password = prompt('Enter a password, please!');
+        if( password === '' ) {
+            fail( 'You must enter a password.' );
+        } else if( password.length < minPasswordLength ) {
+            fail( 'You must enter a longer password.' );
+        }
 
-	/**
-	  * Decrypt the content of a div that is the first element of the parent of the caller.
-	  */
-	decrypt = function ( ) {
-		var password = prompt('Enter a password, please!'),
-		textElement = this.parentNode.firstChild;
-		textElement.textContent = sjcl.decrypt(password, textElement.textContent);
-	},
+        var encrypted = startBlock +
+            sjcl.encrypt(password, bodyTextarea.value)
+            + endBlock;
+        bodyTextarea.value = encrypted;
+    },
 
-	/**
+    /**
+      * Decrypt the content of a div that is the first element of the parent of the caller.
+      */
+    decrypt = function ( ) {
+        var password = prompt('Enter a password, please!'),
+        textElement = this.parentNode.firstChild;
+
+        if( !isEncrypted( textElement.textContent )) {
+            fail( 'This text is not encrypted.' );
+        }
+
+        // Chop off the start and end blocks.
+        var rawText = textElement.textContent.slice(startBlock.length, -endBlock.length);
+        textElement.textContent = sjcl.decrypt(password, rawText);
+    },
+
+    /**
       * Add an `encrypt' button for composition.
       */
-	buildComposeInterface = function() {
-		var divElements = gmailDoc.getElementsByTagName('div'),
-		discardButton = null;
+    buildComposeInterface = function() {
+        var divElements = gmailDoc.getElementsByTagName('div'),
+        discardButton = null;
 
-		// Find the div with text 'Discard'.
-		for( var i = 0 ; i < divElements.length ; i ++ ) {
-			// Is a text node.
-			var div = divElements[i];
-			if( div.firstChild !== null ) { // is this the best way to detect absence of child?
-				var child = div.firstChild;
-				if( child.nodeType === 3 ) {
-					if( child.nodeValue === 'Discard' ) {
-						discardButton = div;
-						// we've found our discard button, break out of loop.
-						break;
-					}
-				}
-			}
-		}
+        // Find the div with text 'Discard'.
+        for( var i = 0 ; i < divElements.length ; i ++ ) {
+            // Is a text node.
+            var div = divElements[i];
+            if( div.firstChild !== null ) { // is this the best way to detect absence of child?
+                var child = div.firstChild;
+                if( child.nodeType === 3 ) {
+                    if( child.nodeValue === 'Discard' ) {
+                        discardButton = div;
+                        // we've found our discard button, break out of loop.
+                        break;
+                    }
+                }
+            }
+        }
 
-		// Fail out if we don't know where to put button.
-		if( discardButton === null ) {
-			fail( 'Could not find the Discard button' );
-		}
+        // Fail out if we don't know where to put button.
+        if( discardButton === null ) {
+            fail( 'Could not find the Discard button' );
+        }
 
-		// Generate the interface elements
-		var containerSpan = gmailDoc.createElement( 'span' ),
-		encryptButton = gmailDoc.createElement( 'div' );
+        // Generate the interface elements
+        var containerSpan = gmailDoc.createElement( 'span' ),
+        encryptButton = gmailDoc.createElement( 'div' );
 
-		// Set up container div
-		containerSpan.className = containerClass;
+        // Set up container div
+        containerSpan.className = containerClass;
 
-		// Set up encrypt button
-		encryptButton.setAttribute('role', 'button'); // necessary?
-		encryptButton.className = discardButton.className; // copy styling
-		encryptButton.appendChild( gmailDoc.createTextNode( 'Encrypt' )); // set text
-		encryptButton.onclick = encrypt; // call 'encrypt' on click
+        // Set up encrypt button
+        encryptButton.setAttribute('role', 'button'); // necessary?
+        encryptButton.className = discardButton.className; // copy styling
+        encryptButton.appendChild( gmailDoc.createTextNode( 'Encrypt' )); // set text
+        encryptButton.onclick = encrypt; // call 'encrypt' on click
 
-		// Lay it on down brother
-		containerSpan.appendChild( encryptButton );
+        // Lay it on down brother
+        containerSpan.appendChild( encryptButton );
 
-		discardButton.parentNode.insertBefore( containerSpan ); // insert before the discard button
-	},
+        discardButton.parentNode.insertBefore( containerSpan ); // insert before the discard button
+    },
 
-	/**
-	  * Add a 'decrypt' button for message content.
-	  */
-	buildInboxInterface = function() {
-		var divElements = gmailDoc.getElementsByTagName('div'),
-		mainDiv = null,
-		buttonClass = null;
+    /**
+      * Add a 'decrypt' button for message content.
+      */
+    buildInboxInterface = function() {
+        var divElements = gmailDoc.getElementsByTagName('div'),
+        mainDiv = null,
+        buttonClass = null;
 
-		// Find main div from role attribute
-		for( var i = 0 ; i < divElements.length ; i++ ) {
-			if(divElements[i].getAttribute( 'role' ) === 'main' ) {
-				mainDiv = divElements[i];
-				break;
-			}
-		}
+        // Find main div from role attribute
+        for( var i = 0 ; i < divElements.length ; i++ ) {
+            if(divElements[i].getAttribute( 'role' ) === 'main' ) {
+                mainDiv = divElements[i];
+                break;
+            }
+        }
 
-		// Find divs with text from inside main div
-		var mainDivChildren = mainDiv.getElementsByTagName('div'),
-		divsWithText = []; // push divs with text onto this
+        // Find divs with text from inside main div with text starting with
+        // startBlock and ending with endBlock.
+        var mainDivChildren = mainDiv.getElementsByTagName('div'),
+        divsWithText = []; // push divs with text onto this
 
-		for( var i = 0 ; i < mainDivChildren.length ; i++ ) {
-			var div = mainDivChildren[i];
-			if( div.firstChild !== null ) {
-				if(div.firstChild.nodeType === 3) {
-					if(div.getAttribute('role') === 'button') { // if it's a button, pull out its class to make buttons
-						buttonClass = div.className;
-					} else {
-						divsWithText.push( div ); // otherwise, add it to the div with text
-					}
-				}
-			}
-		}
+        for( var i = 0 ; i < mainDivChildren.length ; i++ ) {
+            var div = mainDivChildren[i];
+            if( div.firstChild !== null ) {
+                if(div.firstChild.nodeType === 3) {
+                    var text = div.firstChild.textContent;
+                    if( isEncrypted( div.firstChild.textContent )) {
+                        divsWithText.push( div );
+                    }
+                    // if(div.getAttribute('role') === 'button') { // if it's a button, pull out its class to make buttons
+                    //     buttonClass = div.className;
+                    // } else {
+                    //     divsWithText.push( div ); // otherwise, add it to the div with text
+                    // }
+                }
+            }
+        }
 
-		// Add decrypt button to all divs with text.
-		for( var i = 0 ; i < divsWithText.length ; i++ ) {
-			var containerSpan = gmailDoc.createElement( 'span' ),
-			decryptButton = gmailDoc.createElement( 'div' );
+        // Add decrypt button to matching divs.
+        for( var i = 0 ; i < divsWithText.length ; i++ ) {
+            var containerSpan = gmailDoc.createElement( 'span' ),
+            decryptButton = gmailDoc.createElement( 'span' );
 
-			containerSpan.className = containerClass;
-			containerSpan.appendChild(decryptButton);
+            containerSpan.setAttribute('style', 'padding: 5px; background: black; color: white');
 
-			if(buttonClass !== null) { // give it a button-like class if we can.
-				decryptButton.className = buttonClass;
-			}
-			decryptButton.appendChild( document.createTextNode('Decrypt') );
-			decryptButton.setAttribute( 'role', 'button' );
-			containerSpan.onclick = decrypt; // handler to decrypt
+            containerSpan.className = containerClass;
+            containerSpan.appendChild(decryptButton);
 
-			divsWithText[i].parentNode.insertBefore(containerSpan);
-		}
-	},
+            // if(buttonClass !== null) { // give it a button-like class if we can.
+            //     decryptButton.className = buttonClass;
+            // }
+            decryptButton.appendChild( document.createTextNode('Decrypt') );
+            decryptButton.setAttribute( 'role', 'button' );
+            containerSpan.onclick = decrypt; // handler to decrypt
 
-	/**
-	  * Handle hash changes, keeping the interface fresh.  Event loop, kinda!
-	  */
-	hashChangeHandler = function() {
-		var curFragment = document.location.hash,
-		oldElems = gmailDoc.getElementsByClassName( containerClass );
+            divsWithText[i].parentNode.insertBefore(containerSpan);
+        }
+    },
 
-		// Remove the existing interface if it already exists
-		if( oldElems.length > 0 ) {
-			for( var i = 0 ; i < oldElems.length ; i ++ ) {
-				oldElems[i].parentNode.removeChild( oldElems[i] );
-			}
-		}
+    /**
+      * Handle hash changes, keeping the interface fresh.
+      */
+    hashChangeHandler = function() {
+        var curFragment = document.location.hash,
+        oldElems = gmailDoc.getElementsByClassName( containerClass );
 
-		// Create new interface depending on current location
+        // Remove the existing interface if it already exists
+        if( oldElems.length > 0 ) {
+            for( var i = 0 ; i < oldElems.length ; i ++ ) {
+                oldElems[i].parentNode.removeChild( oldElems[i] );
+            }
+        }
 
-		// Composing
-		if( curFragment.indexOf('#compose') === 0 || curFragment.indexOf('#drafts') === 0 ) {
-			buildComposeInterface();
-		} else if( curFragment.indexOf('#inbox/') === 0 ) { // Reading a specific message (has trailing '/')
-			buildInboxInterface();
-		} else { // We can't handle anything else.
-			//fail("Can't do anything in " + curFragment + ", try composing a message or reading one instead.");
-		}
-	};
+        // Create new interface depending on current location
 
-	//
-	// Actual function calls.
-	//
+        // Composing
+        if( curFragment.indexOf('#compose') === 0 || curFragment.indexOf('#drafts') === 0 ) {
+            buildComposeInterface();
+        } else if( curFragment.indexOf('#inbox/') === 0 ) { // Reading a specific message (has trailing '/')
+            buildInboxInterface();
+        } else { // We can't handle anything else.
+            //fail("Can't do anything in " + curFragment + ", try composing a message or reading one instead.");
+        }
+    };
 
-	// Keep us fresh.  It all dies on reload, though.
-	window.onhashchange = hashChangeHandler;
+    // Keep us fresh.  It all dies on reload, though.
+    window.onhashchange = hashChangeHandler;
 })();
